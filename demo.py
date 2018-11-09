@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
+os.environ["PATH"] += os.pathsep + "C:\\Users\\Trac Quang Thinh\\Desktop\\Source\\graphviz-2.38\\bin"
 
 from graphviz import Digraph
 import copy
@@ -54,7 +56,9 @@ class DFA:
         return [state for state in self.states if state not in ([self.init_state] + self.final_states)]
 
     def get_predecessors(self, state):
-        return [key for key, value in self.ds.items() if state in value.keys() and value[state] != 'ϕ' and key != state]
+        result = [key for key, value in self.ds.items() if state in value.keys() and value[state] != 'ϕ' and key != state]
+        print('PRE', state, result)
+        return result
 
     def get_successors(self, state):
         return [key for key, value in self.ds[state].items() if value != 'ϕ' and key != state]
@@ -82,8 +86,11 @@ class DFA:
                 for j in successors:
                     inter_loop = self.get_if_loop(inter)
                     # print('i : ', i, ' j : ', j)
-                    dict_states[i][j] = '+'.join(('(' + dict_states[i][j] + ')', ''.join(('(' + dict_states[i][
-                        inter] + ')', '(' + inter_loop + ')' + '*', '(' + dict_states[inter][j] + ')'))))
+                    dict_states[i][j] = '+'.join(
+                        ('(' + dict_states[i][j] + ')', 
+                        ''.join(('(' + dict_states[i][inter] + ')', '(' + inter_loop + ')' + '*', '(' + dict_states[inter][j] + ')'))
+
+                        ))
 
             dict_states = {r: {c: v for c, v in val.items() if c != inter} for r, val in dict_states.items() if
                            r != inter}  # remove inter node
