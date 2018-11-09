@@ -1,0 +1,14 @@
+digraph {
+	node [shape=point]
+	qi
+	node [color=black shape=circle style=""]
+	1
+	qi -> 1 [label=start]
+	node [color=green shape=doublecircle style=""]
+	2
+	2 -> 2 [label=a]
+	2 -> 1 [label=b]
+	1 -> 2 [label=b]
+	1 -> 1 [label=a]
+label = "\n\ntest"
+}
