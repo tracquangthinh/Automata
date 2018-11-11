@@ -4,15 +4,8 @@ digraph {
 	node [color=black shape=circle style=""]
 	1
 	qi -> 1 [label=start]
-	node [color=black shape=circle style=""]
-	2
 	node [color=green shape=doublecircle style=""]
-	3
+	2
 	1 -> 2 [label=a]
-	1 -> 3 [label=b]
-	2 -> 1 [label=a]
-	2 -> 3 [label=b]
-	3 -> 1 [label=b]
-	3 -> 2 [label=a]
 label = "\n\ntest"
 }

@@ -1,0 +1,42 @@
+digraph {
+	node [shape=point]
+	qi
+	node [color=black shape=circle style=""]
+	1
+	qi -> 1 [label=start]
+	node [color=black shape=circle style=""]
+	2
+	node [color=black shape=circle style=""]
+	3
+	node [color=black shape=circle style=""]
+	4
+	node [color=black shape=circle style=""]
+	5
+	node [color=black shape=circle style=""]
+	6
+	node [color=black shape=circle style=""]
+	7
+	node [color=black shape=circle style=""]
+	8
+	node [color=black shape=circle style=""]
+	9
+	node [color=black shape=circle style=""]
+	10
+	node [color=black shape=circle style=""]
+	11
+	node [color=green shape=doublecircle style=""]
+	12
+	1 -> 2 [label=b]
+	2 -> 3 [label="ε"]
+	3 -> 4 [label="ε"]
+	3 -> 6 [label="ε"]
+	4 -> 5 [label=a]
+	5 -> 8 [label="ε"]
+	6 -> 7 [label=b]
+	7 -> 8 [label="ε"]
+	8 -> 9 [label="ε"]
+	9 -> 10 [label=a]
+	10 -> 11 [label="ε"]
+	11 -> 12 [label=b]
+label = "\n\nb(a+b)ab"
+}

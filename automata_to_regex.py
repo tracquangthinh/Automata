@@ -1,7 +1,8 @@
-import os
-os.environ["PATH"] += os.pathsep + "C:\\Users\\Trac Quang Thinh\\Desktop\\Source\\graphviz-2.38\\bin"
+# import os
+# os.environ["PATH"] += os.pathsep + "C:\\Users\\Trac Quang Thinh\\Desktop\\Source\\graphviz-2.38\\bin"
 
 from graphviz import Digraph
+from copy import deepcopy
 
 class Automata:
   def __init__(self, states, alphabets, transition_matrix, init_state, final_states):
@@ -81,8 +82,8 @@ class Automata:
       return ''
 
   def to_regex(self):
-    dict_stages = self.transitions
-    inter_states = self.inter_states()
+    dict_states = deepcopy(self.transitions)
+    inter_states = self.get_inter_states()
     
     if len(inter_states) > 0:
       for inter_state in inter_states:
@@ -91,13 +92,78 @@ class Automata:
         inter_loop = self.get_alphabet_loop(inter_state)
         for pre_state in pre_states:
           for post_state in post_states:
-            new_tran = "+".join(dict_stages[pre_state][post_state])
-            new_tran = "+".join(new_tran, dict_stages[pre_state][inter_state])
+            new_tran = "+".join(dict_states[pre_state][post_state])
+            if len(new_tran)>0:
+              new_tran += "+"
+            new_tran += "+".join(dict_states[pre_state][inter_state])
             if inter_loop != "":
-              new_tran = "+".join(new_tran, inter_loop+"*")
-            new_tran = "+".join(new_tran, dict_stages[inter_state][post_state])
-            dict_stages[pre_state][post_state] = new_tran
+              new_tran += inter_loop+"*"
+            new_tran += "+".join(dict_states[inter_state][post_state])
+            dict_states[pre_state][post_state] = '(' + new_tran + ')'
 
-fa = Automata(['1', '2', '3'], ['a', 'b'], [[['3', '1'], ['2']], [['2'], ['3']], [['1'], ['3']]], '1', ['3'])
-print(fa.get_inter_states())
-fa.draw_graph("Test", "Graphs\\test.svg")
+        print(dict_states)
+        dict_states_ = dict()
+        for state in dict_states.keys():
+          if state != inter_state:
+            trans = {}
+            for s in dict_states[state].keys():
+              if s != inter_state:
+                trans[s] = dict_states[state][s]
+            dict_states_[state] = trans
+
+        dict_states = dict_states_
+
+    init_loop = self.get_alphabet_loop(self.init_state)
+    init_to_final = "".join(dict_states[self.init_state][self.final_states[0]])
+    final_loop = self.get_alphabet_loop(self.final_states[0])
+    final_to_init = "".join(dict_states[self.final_states[0]][self.init_state])
+
+    result = ""
+    if len(init_loop) > 1:
+      result += '(' + init_loop + ')*'
+    elif len(init_loop) == 1:
+      result += init_loop + '*'
+    print(init_to_final)
+    result += init_to_final
+    if len(final_loop) > 1:
+      result += '(' + final_loop + ')*'
+    elif len(final_loop) == 1:
+      result += final_loop + '*'
+    result += final_to_init
+    result = '(' + result + ')*' + init_to_final
+    return result
+
+if __name__ == "__main__":
+  states = []
+  alphabets = []
+  start_state = None
+  final_states = []
+  transitions = []
+
+  test_file = "automata_to_regex_1"
+  f = open('./test/'+test_file, "r")
+  f.readline()
+  states = f.readline().rstrip().split()
+  f.readline()
+  alphabets = f.readline().rstrip().split()
+  f.readline()
+  start_state = f.readline().rstrip()
+  f.readline()
+  final_states = f.readline().rstrip().split()
+  f.readline()
+  for s in states:
+    seqs = f.readline().rstrip().split()
+    tran = []
+    for seq in seqs:
+      tran.append(seq.split(','))
+    transitions.append(tran)
+
+  regex = ""
+  for s in final_states:
+    sfa = Automata(states, alphabets, transitions, start_state, [s])
+    if len(regex) > 0:
+      regex += "+"+sfa.to_regex()
+    else:
+      regex = sfa.to_regex()
+  fa = Automata(states, alphabets, transitions, start_state, final_states)
+  fa.draw_graph(regex, "./graphs/"+test_file+".svg")
