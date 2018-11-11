@@ -121,7 +121,6 @@ class Determinization:
     nfa = self.completion(nfa)
     
     if self.check_deterministic(nfa):
-      print("FUCK")
       return nfa
 
     new_nfa = Automata(alphabets=nfa.alphabets)
