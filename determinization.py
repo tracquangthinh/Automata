@@ -123,134 +123,63 @@ class Determinization:
     if self.check_deterministic(nfa):
       return nfa
 
-    new_nfa = Automata(alphabets=nfa.alphabets)
-    nfa_transitions = deepcopy(nfa.transitions)
+    q = []
+    dfa = Automata(alphabets=nfa.alphabets)
+    dfa.set_start_state(nfa.start_state)
 
-    combine_states = []
-    new_transitions = []
-    for state, transitions in nfa_transitions.items():
-      alphabets = dict()
-      for state_, transition in transitions.items():
-        while(1):
-          if len(transition) == 0:
-            break
-          a = transition.pop()
-          if a not in alphabets:
-            alphabets[a] = [state_]
-          else:
-            alphabets[a].append(state_)
-      new_transitions.append((state, alphabets))
+    nfa_transitions = dict()
+    dfa_transitions = dict()
 
-      for alphabet in alphabets.values():
-        if len(alphabet) > 1:
-          if alphabet not in combine_states:
-            combine_states.append(alphabet)
-
-    print(new_transitions)
-    print(combine_states)
-
-    #remove state belong combine state
-    new_transitions_ = []
-    for transition in new_transitions:
-      state = transition[0]
-      trans = transition[1]
-      in_combine = False
-      for combine_state in combine_states:
-        if state in combine_state:
-          new_transitions_.append((combine_state, trans))
-          in_combine = True
-      if not in_combine:
-        new_transitions_.append(([state], trans))
-
-    new_transitions = new_transitions_
-    print(new_transitions)
-
-    final_states = set()
-
-    #replace combine state by a single state
-    new_transitions_ = dict()
-    max_state_index = max(nfa.states)+1
-    for combine_state in combine_states:
-      #get final state
-      for final_state in nfa.final_states:
-        if final_state in combine_state:
-          final_states.add(max_state_index)
-
-      for transition in new_transitions:
-        if transition[0] == combine_state:
-          new_transitions_[max_state_index] = dict()
-          for alphabet in nfa.alphabets:
-            if transition[1][alphabet] == combine_state:
-              new_transitions_[max_state_index][alphabet] = max_state_index
-            else:
-              new_transitions_[max_state_index][alphabet] = transition[1][alphabet][0]
+    for from_state, to_states in nfa.transitions.items():
+      for to_state, trans in nfa.transitions[from_state].items():
+        transition_symbol = list(trans)[0]
+        if (from_state, transition_symbol) not in nfa_transitions:
+          nfa_transitions[(from_state, transition_symbol)] = [to_state]
         else:
-          new_transitions_[transition[0][0]] = dict()
-          for alphabet, tran in transition[1].items():
-            if tran == combine_state:
-              new_transitions_[transition[0][0]][alphabet] = max_state_index
-            else:
-              new_transitions_[transition[0][0]][alphabet] = transition[1][alphabet][0]
+          nfa_transitions[(from_state, transition_symbol)].append(to_state)
 
-      max_state_index += 1
+    q.append((0,))
 
-    if len(new_transitions_) > 0:
-      new_transitions = new_transitions_
-    else:
-      new_transitions_ = dict()
-      for transition in new_transitions:
-        i = transition[0][0]
-        tran = dict()
-        for alphabet in alphabets:
-          tran[alphabet] = transition[1][alphabet][0]
-        new_transitions_[i] = tran
-      new_transitions = new_transitions_
-    print(new_transitions)
-    
-    #map states
-    new_states = new_transitions.keys()
-    map_states = dict()
-    for i, new_state in enumerate(new_states):
-      map_states[new_state] = i
-      if new_state in nfa.final_states:
-        final_states.add(i)
-    print(map_states)
-    print(new_transitions)
-    new_transitions_ = dict()
-    for new_state in new_states:
+    for dfa_state in q:
       for alphabet in nfa.alphabets:
-        print(new_state, alphabet)
-        i = map_states[new_state]
-        a = new_transitions[new_state][alphabet]
-        if a in map_states:
-          j = map_states[a]
-          print("HAIZZ", j)
+        if len(dfa_state) == 1 and (dfa_state[0], alphabet) in nfa_transitions:
+          dfa_transitions[(dfa_state, alphabet)] = nfa_transitions[(dfa_state[0], alphabet)]
+          q_new = dfa_transitions[(dfa_state, alphabet)]
+          if tuple(q_new) not in q:
+            q.append(tuple(q_new))
         else:
-          map_states[a] = max(map_states.values())+1
-        if i not in new_transitions_:
-          new_transitions_[i] = dict()
-        if j not in new_transitions_[i]:
-          new_transitions_[i][j] = set()
-        new_transitions_[i][j] = new_transitions_[i][j].union(alphabet)
-    
-    print(new_transitions)
-    new_transitions = new_transitions_
-    print(new_transitions)
-    new_nfa.add_transitions(new_transitions)
+          destinations = []
+          final_destination = []
+          
+          for nfa_state in dfa_state:
+            if (nfa_state, alphabet) in nfa_transitions and nfa_transitions[(nfa_state, alphabet)] not in destinations:
+              destinations.append(nfa_transitions[(nfa_state, alphabet)])
 
-    new_nfa.set_start_state(map_states[nfa.start_state])
+          if not destinations:
+            final_destination.append(None)
+          else:  
+            for destination in destinations:
+              for value in destination:
+                if value not in final_destination:
+                  final_destination.append(value)
+              
+          dfa_transitions[(dfa_state, alphabet)] = final_destination
 
-    while 1:
-      if len(final_states) == 0:
-        break
-      a = final_states.pop()
-      if a in map_states:
-        new_nfa.add_final_states(map_states[a])
+          if tuple(final_destination) not in q:
+              q.append(tuple(final_destination))
 
-    return new_nfa
+    for key in dfa_transitions:
+      dfa.add_transition(q.index(tuple(key[0])), q.index(tuple(dfa_transitions[key])), key[1])
+
+    for q_state in q:
+      for nfa_final_state in nfa.final_states:
+        if nfa_final_state in q_state:
+          dfa.add_final_states(q.index(q_state))
+
+    return dfa
 
 from regex_to_automata import RegexToNFA
-regex = "b*aba*"
+regex = "a*b(a+b)*"
 converter = RegexToNFA(regex)
 fa = converter.get_nfa()
 # fa.draw_graph(regex, "./graphs/test1.svg", view=True)
