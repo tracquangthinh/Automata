@@ -14,7 +14,6 @@ class Automata:
     self.n_alphabets = len(self.alphabets)
 
     self.transitions = self.get_trans_dict(transition_matrix)
-    print(self.transitions)
 
   @staticmethod
   def empty():
@@ -101,7 +100,6 @@ class Automata:
             new_tran += "+".join(dict_states[inter_state][post_state])
             dict_states[pre_state][post_state] = '(' + new_tran + ')'
 
-        print(dict_states)
         dict_states_ = dict()
         for state in dict_states.keys():
           if state != inter_state:
@@ -123,7 +121,6 @@ class Automata:
       result += '(' + init_loop + ')*'
     elif len(init_loop) == 1:
       result += init_loop + '*'
-    print(init_to_final)
     result += init_to_final
     if len(final_loop) > 1:
       result += '(' + final_loop + ')*'
@@ -140,7 +137,7 @@ if __name__ == "__main__":
   final_states = []
   transitions = []
 
-  test_file = "automata_to_regex_1"
+  test_file = "automata_to_regex"
   f = open('./test/'+test_file, "r")
   f.readline()
   states = f.readline().rstrip().split()
@@ -167,3 +164,4 @@ if __name__ == "__main__":
       regex = sfa.to_regex()
   fa = Automata(states, alphabets, transitions, start_state, final_states)
   fa.draw_graph(regex, "./graphs/"+test_file+".svg")
+  print("Done!")

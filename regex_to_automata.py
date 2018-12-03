@@ -104,7 +104,7 @@ class RegexToNFA:
     if operator == RegexToNFA.star():
       fa = self.automata.pop()
       self.automata.append(AutomataConstruction.star_construct(fa))
-      AutomataConstruction.star_construct(fa).print()
+      # AutomataConstruction.star_construct(fa).print()
     elif operator in self.operators:
       if len(self.automata) < 2:
         raise Exception("Inadequate operands")
@@ -164,12 +164,11 @@ class RegexToNFA:
   def get_nfa(self):
     return self.nfa
           
-
-# regex = "(a+b)*"
-# converter = RegexToNFA(regex)
-# fa_ = converter.get_nfa()
-# print(fa_.transitions)
-# # # print(num)
-# # print(fa_.get_empty_by_state(fa_.start_state))
-# fa_.draw_graph(regex, "./graphs/"+regex+".svg", view=True)
+if __name__=='__main__':
+    regex = input("Regular expression: ")
+    converter = RegexToNFA(regex)
+    fa_ = converter.get_nfa()
+    # # print(num)
+    # print(fa_.get_empty_by_state(fa_.start_state))
+    fa_.draw_graph(regex, "./graphs/"+regex+".svg", view=True)
 

@@ -111,7 +111,6 @@ class Determinization:
         while len(tran) > 0:
           alphabets.append(tran.pop())
       if sorted(alphabets) != sorted(list(nfa.alphabets)):
-        print(state, alphabets, list(nfa.alphabets))
         return False
     return True
 
@@ -179,14 +178,18 @@ class Determinization:
     return dfa
 
 from regex_to_automata import RegexToNFA
-regex = "a*b(a+b)*"
+regex = input("Regular expression: ")
 converter = RegexToNFA(regex)
 fa = converter.get_nfa()
+print("NFA: ")
+fa.print()
 # fa.draw_graph(regex, "./graphs/test1.svg", view=True)
 # fa.draw_graph("test", "./graphs/test.svg", view=True)
 
 determinization = Determinization(fa)
 dfa = determinization.get_dfa()
+print("DFA: ")
+dfa.print()
 # print(dfa)
-dfa.draw_graph(regex, "./graphs/test.svg", view=True)
+dfa.draw_graph(regex, "./graphs/determinization.svg", view=False)
 

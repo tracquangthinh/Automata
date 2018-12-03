@@ -42,7 +42,6 @@ def intersection(fa_1, fa_2):
   return fa
   
 def reachable(fa, iteration, state):
-  print(iteration, state)
   if iteration > 10:
     return False
   pre_states = fa.get_pre_states(state)
@@ -100,10 +99,14 @@ def generate_fa(file):
       
 
 if __name__ == "__main__":
-  fa_1= generate_fa("./test/intersection_1")
+  print("FA1: ")
+  fa_1= generate_fa("./test/fa_1")
+  fa_1.draw_graph("FA1", "./graphs/FA1.svg")
   fa_1.print()
 
-  fa_2 = generate_fa("./test/intersection_2")
+  print("FA2: ")
+  fa_2 = generate_fa("./test/fa_2")
+  fa_2.draw_graph("FA2", "./graphs/FA2.svg")
   fa_2.print()
 
-  print(inclusion(fa_1, fa_2))
+  print("L(FA1) belongs to L(FA2): ", inclusion(fa_1, fa_2))
