@@ -32,7 +32,7 @@ class Automata:
       if state in self.transitions:
         for to_state in self.transitions[state]:
           if alphabet in self.transitions[state][to_state]:
-            results.add(alphabet)
+            results.add(to_state)
     return results
 
   def set_start_state(self, state):
@@ -40,7 +40,7 @@ class Automata:
     self.states.add(state)
 
   def add_final_states(self, state):
-    if isinstance(state, int):
+    if isinstance(state, int) or isinstance(state, str):
       state = [state]
     for s in state:
       if s not in self.final_states:
@@ -109,4 +109,6 @@ class Automata:
         for state in to_states:
             rebuild.add_transition(translations[from_state], translations[state], to_states[state])
     return [rebuild, start_state]
-
+  
+  def get_pre_states(self, state):
+    return [s for s in self.states if state in self.transitions[s]]

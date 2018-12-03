@@ -1,0 +1,12 @@
+#states
+5 6 7
+#alphabets
+a b
+#start state
+5
+#final states
+7
+#transitions
+6 7
+6 7
+5 6
